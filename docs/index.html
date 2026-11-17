@@ -1,67 +1,78 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#0b1020">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1020">
 <title>URL Price Graph</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
 :root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#e9eefb;background:#0b1020;color-scheme:dark}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#1b3158 0,#0b1020 56%);padding:34px 18px}
-main{max-width:1120px;margin:auto}.top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px}
-h1{font-size:clamp(27px,4vw,38px);margin:0 0 7px;letter-spacing:-.03em}.sub{color:#a8b6d0;font-size:14px;line-height:1.55;max-width:720px}
-.panel{background:#111b30;border:1px solid #283b5d;border-radius:17px;padding:21px;margin:16px 0;box-shadow:0 18px 55px #0003}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#1b3158 0,#0b1020 56%);padding:30px 18px}
+main{max-width:1180px;margin:auto}.top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:clamp(27px,4vw,38px);margin:0 0 7px;letter-spacing:-.03em}.sub{color:#a8b6d0;font-size:14px;line-height:1.55;max-width:760px}
+.panel{background:#111b30;border:1px solid #283b5d;border-radius:17px;padding:20px;margin:16px 0;box-shadow:0 18px 55px #0003}
 h2{font-size:17px;margin:0 0 14px}.label{display:block;color:#b9c7df;font-size:13px;font-weight:650;margin:0 0 8px}
-input,textarea,select{width:100%;background:#0b1426;color:#edf3ff;border:1px solid #354b70;border-radius:10px;padding:12px 13px;font:inherit;min-width:0}
+input,textarea,select{width:100%;background:#0b1426;color:#edf3ff;border:1px solid #354b70;border-radius:10px;padding:11px 12px;font:inherit;min-width:0}
 input:focus,textarea:focus,select:focus{outline:2px solid #7099e8;outline-offset:1px}
-.urlrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
-button{background:#315b9f;border:1px solid #4d78bb;border-radius:10px;padding:11px 17px;color:white;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
-button:hover{background:#3c6bb8}button:disabled{opacity:.6;cursor:wait}.secondary{background:#1a2944;border-color:#415575}.secondary:hover{background:#243858}
+button{background:#315b9f;border:1px solid #4d78bb;border-radius:9px;padding:10px 14px;color:white;font-weight:700;font-size:13px;cursor:pointer;white-space:nowrap}
+button:hover{background:#3c6bb8}button:disabled{opacity:.55;cursor:wait}.secondary{background:#1a2944;border-color:#415575}.secondary:hover{background:#243858}.danger{background:#382235;border-color:#71465a}.danger:hover{background:#503044}
+.formgrid{display:grid;grid-template-columns:minmax(180px,.7fr) minmax(0,1.5fr) auto;gap:10px;align-items:end}
 .hint,.small{color:#9eacc5;font-size:12px;line-height:1.55;margin-top:9px}
-.note{border-left:3px solid #6487c4;padding:9px 12px;background:#172640;border-radius:0 8px 8px 0;color:#bdcbe2;font-size:13px;line-height:1.5;margin-top:14px}
-.status{font-size:13px;color:#b5c4dc;margin-top:12px;min-height:19px;white-space:pre-wrap}.status.error{color:#ff9f9f}.status.ok{color:#9edbb8}
+.note{border-left:3px solid #6487c4;padding:9px 12px;background:#172640;border-radius:0 8px 8px 0;color:#bdcbe2;font-size:13px;line-height:1.5;margin-top:13px}
+.status{font-size:13px;color:#b5c4dc;margin-top:11px;min-height:19px;white-space:pre-wrap}.status.error{color:#ff9f9f}.status.ok{color:#9edbb8}
+.saved-list{display:grid;gap:8px;margin-top:15px}.saved-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center;background:#0c1629;border:1px solid #273b5c;padding:10px 12px;border-radius:11px}
+.saved-item.active{border-color:#78a5ed;box-shadow:inset 0 0 0 1px #78a5ed}.saved-meta{min-width:0}.saved-name{font-size:14px;font-weight:700;color:#e6edfa}.saved-url{font-size:11px;color:#91a3c3;overflow-wrap:anywhere;margin-top:4px}
+.saved-actions{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}.saved-actions button{padding:7px 10px;font-size:12px}
+.empty{color:#8fa0bd;font-size:13px;padding:12px 0}
+textarea{min-height:130px;resize:vertical;margin-top:9px;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.ranges{display:flex;gap:6px;flex-wrap:wrap}.range-btn{background:#15243d;border-color:#344b70;padding:8px 12px;min-width:48px}.range-btn.active{background:#315b9f;border-color:#82a9e8}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:16px 0}
+.stat{background:#0c1629;border:1px solid #273b5c;padding:12px;border-radius:11px;min-width:0}.stat span{font-size:10px;letter-spacing:.08em;color:#9eacc5}.stat strong{display:block;font-size:clamp(18px,3vw,25px);margin-top:5px;overflow-wrap:anywhere}
+.chartbox{height:435px;position:relative;margin-top:13px;cursor:crosshair;touch-action:pan-y}
 .fieldrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
-.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
-.stat{background:#0c1629;border:1px solid #273b5c;padding:13px;border-radius:12px;min-width:0}
-.stat span{font-size:11px;letter-spacing:.07em;color:#9eacc5}.stat strong{display:block;font-size:clamp(18px,3vw,25px);margin-top:5px;overflow-wrap:anywhere}
-.chartbox{height:410px;position:relative;margin-top:15px}
-.details{margin-top:14px;border-top:1px solid #2a3b59;padding-top:12px}
-summary{cursor:pointer;color:#c4d1e7;font-size:13px;font-weight:650}
-textarea{min-height:140px;resize:vertical;margin-top:10px;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
-.tablewrap{overflow:auto;margin-top:15px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #263754;white-space:nowrap}th{color:#aab9d2;font-weight:650}
-.badge{display:inline-block;border:1px solid #3b5276;color:#b9c9e2;border-radius:100px;padding:4px 9px;font-size:11px;margin-left:7px}
+.details{margin-top:14px;border-top:1px solid #2a3b59;padding-top:12px}summary{cursor:pointer;color:#c4d1e7;font-size:13px;font-weight:650}
+.tablewrap{overflow:auto;margin-top:14px}table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:8px 10px;border-bottom:1px solid #263754;white-space:nowrap}th{color:#aab9d2;font-weight:650}
+.badge{display:inline-block;border:1px solid #3b5276;color:#b9c9e2;border-radius:100px;padding:4px 9px;font-size:11px}
 footer{font-size:12px;color:#899ab7;line-height:1.6;margin:22px 2px}
-@media(max-width:650px){body{padding:22px 12px}.panel{padding:15px}.urlrow{grid-template-columns:1fr}.urlrow button{width:100%}.stats{gap:7px}.stat{padding:10px}.chartbox{height:330px}.fieldrow{grid-template-columns:1fr}}
+@media(max-width:700px){body{padding:20px 11px}.panel{padding:14px}.formgrid{grid-template-columns:1fr}.formgrid button{width:100%}.saved-item{grid-template-columns:1fr}.saved-actions{justify-content:flex-start}.stats{gap:7px}.stat{padding:9px}.chartbox{height:350px}.fieldrow{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <main>
 <header class="top">
- <div><h1>URL Price Graph</h1><div class="sub">Paste a JSON endpoint, fetch it on demand, and plot its timestamp against price. No scheduled collection and no server-side storage.</div></div>
- <span class="badge">Manual fetch</span>
+ <div><h1>URL Price Graph</h1><div class="sub">Save your price sources, paste each response as JSON, and explore the data like a regular market chart.</div></div>
+ <span class="badge">Manual data · saved in this browser</span>
 </header>
 
 <section class="panel">
- <h2>1. Fetch JSON from a URL</h2>
- <label class="label" for="url">GET endpoint</label>
- <div class="urlrow">
-  <input id="url" type="url" spellcheck="false" value="https://www.bigmint.co/prices_tg/graph/1038/INR/f?market=ferrous" placeholder="https://example.com/api/prices">
-  <button id="fetchBtn">Fetch &amp; chart</button>
+ <h2>1. Saved price sources</h2>
+ <div class="formgrid">
+  <div><label class="label" for="newName">Series name</label><input id="newName" placeholder="e.g. BigMint Ferrous"></div>
+  <div><label class="label" for="newUrl">Website / API URL</label><input id="newUrl" type="url" spellcheck="false" placeholder="https://example.com/prices"></div>
+  <button id="saveSource">+ Save source</button>
  </div>
- <div class="hint">The request runs in your browser using GET. The page sends an Accept: application/json header and does not send cookies or credentials.</div>
- <div id="status" class="status" role="status">Ready. Paste a URL and press Fetch &amp; chart.</div>
- <div class="note"><b>Browser restriction:</b> for a URL on another domain, that server must allow this page through CORS. A CORS error cannot be fixed by changing JavaScript headers or adding a Referer value in the browser.</div>
- <details class="details">
-  <summary>Or paste the JSON response directly</summary>
-  <textarea id="jsonInput" placeholder='Paste the response body here, e.g. {"point":[[1764613800000,123.45],[1764635400000,125.10]]}'></textarea>
-  <div style="display:flex;justify-content:flex-end;margin-top:9px"><button id="jsonBtn" class="secondary">Parse pasted JSON</button></div>
- </details>
+ <div class="hint">Save a name and its URL once. Use Copy URL when you need to fetch the JSON manually. Your saved source list and pasted data remain in this browser, not on the website server.</div>
+ <div id="savedList" class="saved-list"><div class="empty">No saved sources yet. Add your first source above.</div></div>
+ <div id="sourceStatus" class="status" role="status"></div>
 </section>
 
 <section class="panel">
- <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
-  <h2 style="margin:0">2. Price history</h2><span id="seriesName" class="badge">No data loaded</span>
+ <div class="toolbar"><h2 style="margin:0">2. Paste the JSON response</h2><span id="activeName" class="badge">No source selected</span></div>
+ <textarea id="jsonInput" placeholder='Paste the response body here, e.g. {"point":[[1764613800000,123.45],[1764635400000,125.10]]}'></textarea>
+ <div class="toolbar" style="margin-top:10px">
+  <div class="small" style="margin:0">Accepts arrays like [timestamp, price] or objects with timestamp and price fields.</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button id="fetchBtn" class="secondary">Try GET from saved URL</button><button id="parseBtn">Parse &amp; save data</button></div>
+ </div>
+ <div id="status" class="status" role="status">Select a source, paste its JSON response, and parse it.</div>
+ <div class="note"><b>Note:</b> Direct GET may still be blocked by the source website's CORS policy. Copy the JSON response from a permitted method and paste it here instead.</div>
+</section>
+
+<section class="panel">
+ <div class="toolbar">
+  <div><h2 style="margin:0 0 4px">3. Interactive price chart</h2><div class="small" style="margin:0">Scroll to zoom · drag left/right to pan · hover for exact values</div></div>
+  <div class="ranges" id="rangeButtons">
+   <button class="range-btn" data-range="1h">1H</button><button class="range-btn" data-range="4h">4H</button><button class="range-btn" data-range="12h">12H</button><button class="range-btn" data-range="1d">1D</button><button class="range-btn" data-range="1m">1M</button><button class="range-btn active" data-range="all">ALL</button>
+   <button class="range-btn" id="resetView" title="Reset chart view">Reset</button>
+  </div>
  </div>
  <div class="stats">
   <div class="stat"><span>LATEST PRICE</span><strong id="latest">—</strong></div>
@@ -73,154 +84,212 @@ footer{font-size:12px;color:#899ab7;line-height:1.6;margin:22px 2px}
   <div><label class="label" for="priceField">Price field / array column</label><select id="priceField" disabled><option>Waiting for data</option></select></div>
  </div>
  <div class="chartbox"><canvas id="priceChart"></canvas></div>
- <div class="small">Dates and times are displayed in Asia/Kolkata (IST). Hover over the line to inspect individual readings.</div>
- <div class="tablewrap">
-  <table><thead><tr><th>Timestamp (IST)</th><th>Price</th></tr></thead><tbody id="recentRows"><tr><td colspan="2" class="small">No readings yet.</td></tr></tbody></table>
- </div>
- <details class="details">
-  <summary>Inspect fetched response</summary>
-  <pre id="rawResponse" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#aabbd6;font-size:12px;max-height:300px;overflow:auto"></pre>
- </details>
+ <div class="tablewrap"><table><thead><tr><th>Timestamp (IST)</th><th>Price</th></tr></thead><tbody id="recentRows"><tr><td colspan="2" class="small">No readings yet.</td></tr></tbody></table></div>
+ <details class="details"><summary>Inspect current JSON response</summary><pre id="rawResponse" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#aabbd6;font-size:12px;max-height:300px;overflow:auto"></pre></details>
 </section>
 <footer>
-This is a browser-only viewer. It does not bypass CORS, authentication, paywalls, or access controls. If the endpoint blocks browser requests, retrieve its JSON through a method you are authorized to use and paste the response above. Avoid pasting URLs containing passwords, session cookies, or private API keys.
+The chart and saved sources use browser local storage and stay on this device/browser. Clearing browser site data will remove them. The site does not bypass CORS or access controls, and it does not upload pasted responses to a server.
 </footer>
 </main>
 <script>
 (function(){
 "use strict";
-var rows=[],chart=null,lastPayload=null;
+var STORAGE_KEY="url-price-graph.saved-series.v3",series=[],activeId=null,rows=[],chart=null,allPoints=[],viewRange="all",customMin=null,customMax=null,dragState=null,canvasEventsAttached=false;
 var $=function(id){return document.getElementById(id);};
 var preferredTime=["timestamp","time","datetime","date","ts","x","t","created_at","updated_at"];
 var preferredPrice=["price","value","rate","close","amount","y","last","p"];
-function escapeHtml(v){return String(v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
-function formatTime(ms,withSeconds){
- return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",second:withSeconds?"2-digit":undefined,hour12:true}).format(new Date(ms));
-}
+var durations={"1h":3600000,"4h":14400000,"12h":43200000,"1d":86400000,"1m":2592000000};
+function makeId(){return "s"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function setStatus(message,kind,target){var el=$(target||"status");el.textContent=message;el.className="status"+(kind?" "+kind:"");}
+function formatTime(ms,seconds){return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",second:seconds?"2-digit":undefined,hour12:true}).format(new Date(ms));}
+function formatPrice(v){return new Intl.NumberFormat("en-IN",{maximumFractionDigits:4}).format(v);}
 function numberTime(v){
  if(v instanceof Date)return v.getTime();
- if(typeof v==="number"&&Number.isFinite(v)){
-  if(Math.abs(v)<100000000000)return v*1000;
-  if(Math.abs(v)>100000000000000)return v/1000;
-  return v;
- }
- if(typeof v==="string"){
-  var trimmed=v.trim();
-  if(/^[-+]?\d+(?:\.\d+)?$/.test(trimmed))return numberTime(Number(trimmed));
-  var parsed=Date.parse(trimmed);return Number.isFinite(parsed)?parsed:NaN;
- }
+ if(typeof v==="number"&&Number.isFinite(v)){if(Math.abs(v)<100000000000)return v*1000;if(Math.abs(v)>100000000000000)return v/1000;return v;}
+ if(typeof v==="string"){var s=v.trim();if(/^[-+]?\d+(?:\.\d+)?$/.test(s))return numberTime(Number(s));var d=Date.parse(s);return Number.isFinite(d)?d:NaN;}
  return NaN;
 }
 function findArray(obj,depth){
- if(depth>5||obj==null)return null;
- if(Array.isArray(obj))return obj;
- if(typeof obj!=="object")return null;
+ if(depth>6||obj==null)return null;if(Array.isArray(obj))return obj;if(typeof obj!=="object")return null;
  var keys=["point","points","data","prices","history","results","result","series","records","items"];
- for(var i=0;i<keys.length;i++){
-  if(Array.isArray(obj[keys[i]])&&obj[keys[i]].length)return obj[keys[i]];
- }
- for(var k=0;k<keys.length;k++){
-  if(obj[keys[k]]&&typeof obj[keys[k]]==="object"){
-   var found=findArray(obj[keys[k]],depth+1);if(found&&found.length)return found;
-  }
- }
- var all=Object.keys(obj);
- for(var j=0;j<all.length;j++){
-  if(obj[all[j]]&&typeof obj[all[j]]==="object"){
-   var nested=findArray(obj[all[j]],depth+1);if(nested&&nested.length)return nested;
-  }
- }
+ for(var i=0;i<keys.length;i++)if(Array.isArray(obj[keys[i]])&&obj[keys[i]].length)return obj[keys[i]];
+ for(var j=0;j<keys.length;j++)if(obj[keys[j]]&&typeof obj[keys[j]]==="object"){var f=findArray(obj[keys[j]],depth+1);if(f&&f.length)return f;}
+ var all=Object.keys(obj);for(var k=0;k<all.length;k++)if(obj[all[k]]&&typeof obj[all[k]]==="object"){var n=findArray(obj[all[k]],depth+1);if(n&&n.length)return n;}
  return null;
 }
 function chooseField(keys,preferred){
- for(var i=0;i<preferred.length;i++){
-  var hit=keys.find(function(k){return k.toLowerCase()===preferred[i];});
-  if(hit!==undefined)return hit;
- }
- for(var j=0;j<preferred.length;j++){
-  var partial=keys.find(function(k){return k.toLowerCase().indexOf(preferred[j])>=0;});
-  if(partial!==undefined)return partial;
- }
+ for(var i=0;i<preferred.length;i++){var hit=keys.find(function(k){return k.toLowerCase()===preferred[i];});if(hit!==undefined)return hit;}
+ for(var j=0;j<preferred.length;j++){var partial=keys.find(function(k){return k.toLowerCase().indexOf(preferred[j])>=0;});if(partial!==undefined)return partial;}
  return keys[0];
 }
-function configureFields(inputRows){
+function configureFields(inputRows,preferredT,preferredP){
  var sample=inputRows.find(function(r){return r!==null&&typeof r==="object";});
- var time=$("timeField"),price=$("priceField");
- time.innerHTML="";price.innerHTML="";
+ var t=$("timeField"),p=$("priceField");t.innerHTML="";p.innerHTML="";
  if(Array.isArray(sample)){
-  time.add(new Option("Column 1 (timestamp)","$0"));time.add(new Option("Column 2 (price)","$1"));
-  price.add(new Option("Column 2 (price)","$1"));price.add(new Option("Column 1 (timestamp)","$0"));
+  t.add(new Option("Column 1 (timestamp)","$0"));t.add(new Option("Column 2 (price)","$1"));
+  p.add(new Option("Column 2 (price)","$1"));p.add(new Option("Column 1 (timestamp)","$0"));
  }else if(sample&&typeof sample==="object"){
-  var keys=Object.keys(sample);
-  keys.forEach(function(k){time.add(new Option(k,k));price.add(new Option(k,k));});
-  time.value=chooseField(keys,preferredTime);
-  price.value=chooseField(keys,preferredPrice);
- }else{
-  throw new Error("Could not identify rows of timestamp and price values in this JSON.");
- }
- time.disabled=false;price.disabled=false;
+  var keys=Object.keys(sample);keys.forEach(function(k){t.add(new Option(k,k));p.add(new Option(k,k));});
+  t.value=preferredT&&keys.indexOf(preferredT)>=0?preferredT:chooseField(keys,preferredTime);
+  p.value=preferredP&&keys.indexOf(preferredP)>=0?preferredP:chooseField(keys,preferredPrice);
+ }else throw new Error("Could not identify timestamp and price rows in this JSON.");
+ if(Array.isArray(sample)){t.value=preferredT||"$0";p.value=preferredP||"$1";}
+ t.disabled=false;p.disabled=false;
 }
-function getValue(row,field){
- if(field==="$0")return row[0];
- if(field==="$1")return row[1];
- return row&&row[field];
+function getValue(row,field){if(field==="$0")return row[0];if(field==="$1")return row[1];return row&&row[field];}
+function activeSeries(){return series.find(function(s){return s.id===activeId;})||null;}
+function saveStorage(){
+ try{localStorage.setItem(STORAGE_KEY,JSON.stringify(series));return true;}
+ catch(e){setStatus("Could not save in browser storage. The pasted response may be too large; try a smaller response or remove old series.","error");return false;}
 }
-function draw(){
- if(!rows.length)throw new Error("No rows found in the response.");
+function renderSaved(){
+ var host=$("savedList");host.innerHTML="";
+ if(!series.length){var empty=document.createElement("div");empty.className="empty";empty.textContent="No saved sources yet. Add your first source above.";host.appendChild(empty);return;}
+ series.forEach(function(s){
+  var item=document.createElement("div");item.className="saved-item"+(s.id===activeId?" active":"");
+  var meta=document.createElement("div");meta.className="saved-meta";
+  var name=document.createElement("div");name.className="saved-name";name.textContent=s.name;
+  var url=document.createElement("div");url.className="saved-url";url.textContent=s.url;
+  meta.append(name,url);
+  var actions=document.createElement("div");actions.className="saved-actions";
+  var open=document.createElement("button");open.className="secondary";open.textContent=s.id===activeId?"Selected":"Open";open.addEventListener("click",function(){selectSeries(s.id);});
+  var copy=document.createElement("button");copy.className="secondary";copy.textContent="Copy URL";copy.addEventListener("click",function(){copyUrl(s.url);});
+  var del=document.createElement("button");del.className="danger";del.textContent="Delete";del.addEventListener("click",function(){deleteSeries(s.id);});
+  actions.append(open,copy,del);item.append(meta,actions);host.appendChild(item);
+ });
+}
+async function copyUrl(url){
+ try{await navigator.clipboard.writeText(url);setStatus("URL copied to clipboard.","ok","sourceStatus");}
+ catch(e){var temp=document.createElement("textarea");temp.value=url;document.body.appendChild(temp);temp.select();try{document.execCommand("copy");setStatus("URL copied to clipboard.","ok","sourceStatus");}catch(x){setStatus("Copy was blocked by the browser. Select and copy the URL manually.","error","sourceStatus");}temp.remove();}
+}
+function selectSeries(id){
+ var s=series.find(function(x){return x.id===id;});if(!s)return;
+ activeId=id;$("newName").value=s.name;$("newUrl").value=s.url;$("activeName").textContent=s.name;
+ $("jsonInput").value=s.payload?JSON.stringify(s.payload,null,2):"";
+ renderSaved();
+ if(s.payload){loadPayload(s.payload,s.name,s.timeField,s.priceField,false);setStatus("Loaded saved data for "+s.name+".","ok");}
+ else{clearGraph();setStatus("Source selected. Paste its JSON response below.","");}
+}
+function deleteSeries(id){
+ var s=series.find(function(x){return x.id===id;});if(!s)return;
+ if(!confirm("Delete saved source \""+s.name+"\" and its locally stored data?"))return;
+ series=series.filter(function(x){return x.id!==id;});
+ if(activeId===id){activeId=null;rows=[];$("activeName").textContent="No source selected";$("jsonInput").value="";clearGraph();}
+ saveStorage();renderSaved();setStatus("Source deleted.","ok","sourceStatus");
+}
+function clearGraph(){
+ rows=[];allPoints=[];customMin=null;customMax=null;viewRange="all";$("seriesName").textContent="No data loaded";$("latest").textContent="—";$("latestTime").textContent="—";$("pointCount").textContent="0";
+ $("recentRows").innerHTML='<tr><td colspan="2" class="small">No readings yet.</td></tr>';$("rawResponse").textContent="";
+ $("timeField").disabled=true;$("priceField").disabled=true;$("timeField").innerHTML="<option>Waiting for data</option>";$("priceField").innerHTML="<option>Waiting for data</option>";
+ if(chart){chart.destroy();chart=null;}updateRangeButtons();
+}
+function pointsFor(rowsInput,tField,pField){
+ return rowsInput.map(function(r){return {x:numberTime(getValue(r,tField)),y:Number(getValue(r,pField))};})
+ .filter(function(p){return Number.isFinite(p.x)&&Number.isFinite(p.y);}).sort(function(a,b){return a.x-b.x;});
+}
+function rangeBounds(){
+ if(!allPoints.length)return null;var low=allPoints[0].x,high=allPoints[allPoints.length-1].x;
+ if(viewRange==="all")return {min:low,max:high};
+ if(viewRange==="custom"&&customMin!==null&&customMax!==null)return {min:customMin,max:customMax};
+ var span=durations[viewRange]||durations["1m"];return {min:Math.max(low,high-span),max:high};
+}
+function updateRangeButtons(){
+ document.querySelectorAll(".range-btn[data-range]").forEach(function(b){b.classList.toggle("active",b.dataset.range===viewRange);});
+}
+function draw(resetRange){
+ if(!rows.length)throw new Error("No rows found in the JSON response.");
  var tf=$("timeField").value,pf=$("priceField").value;
- var pts=rows.map(function(r){
-  var x=numberTime(getValue(r,tf)),y=Number(getValue(r,pf));
-  return {x:x,y:y};
- }).filter(function(p){return Number.isFinite(p.x)&&Number.isFinite(p.y);}).sort(function(a,b){return a.x-b.x;});
- if(!pts.length)throw new Error("No valid points. Choose the correct timestamp and price fields above.");
- $("latest").textContent=new Intl.NumberFormat("en-IN",{maximumFractionDigits:3}).format(pts[pts.length-1].y);
- $("latestTime").textContent=formatTime(pts[pts.length-1].x,false);
- $("pointCount").textContent=pts.length.toLocaleString("en-IN");
- $("recentRows").innerHTML=pts.slice(-12).reverse().map(function(p){return "<tr><td>"+escapeHtml(formatTime(p.x,true))+"</td><td>"+escapeHtml(new Intl.NumberFormat("en-IN",{maximumFractionDigits:4}).format(p.y))+"</td></tr>";}).join("");
- if(chart)chart.destroy();
+ allPoints=pointsFor(rows,tf,pf);
+ if(!allPoints.length)throw new Error("No valid points. Check the timestamp and price field selectors.");
+ var last=allPoints[allPoints.length-1];
+ $("latest").textContent=formatPrice(last.y);$("latestTime").textContent=formatTime(last.x,false);$("pointCount").textContent=allPoints.length.toLocaleString("en-IN");
+ $("recentRows").innerHTML=allPoints.slice(-15).reverse().map(function(p){return "<tr><td>"+formatTime(p.x,true)+"</td><td>"+formatPrice(p.y)+"</td></tr>";}).join("");
+ if(resetRange){viewRange="all";customMin=null;customMax=null;}
+ var bounds=rangeBounds();if(chart)chart.destroy();
  var ctx=$("priceChart").getContext("2d");
- chart=new Chart(ctx,{type:"line",data:{datasets:[{label:"Price",data:pts,borderColor:"#79a8ff",backgroundColor:"rgba(75,132,220,.15)",borderWidth:2,pointRadius:pts.length>250?0:2,pointHoverRadius:5,tension:.16,fill:true}]},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:"nearest",intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:function(items){return items.length?formatTime(items[0].parsed.x,true):"";},label:function(item){return "Price: "+new Intl.NumberFormat("en-IN",{maximumFractionDigits:4}).format(item.parsed.y);}}}},scales:{x:{type:"linear",ticks:{color:"#9eacc5",maxTicksLimit:8,callback:function(v){return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(v));}},grid:{color:"rgba(125,150,190,.13)"}},y:{ticks:{color:"#9eacc5"},grid:{color:"rgba(125,150,190,.13)"}}}}});
+ chart=new Chart(ctx,{type:"line",data:{datasets:[{label:"Price",data:allPoints,borderColor:"#79a8ff",backgroundColor:"rgba(75,132,220,.12)",borderWidth:2,pointRadius:allPoints.length>350?0:2,pointHoverRadius:5,tension:.12,fill:true}]},options:{
+ responsive:true,maintainAspectRatio:false,animation:false,parsing:false,interaction:{mode:"nearest",intersect:false},
+ plugins:{legend:{display:false},tooltip:{callbacks:{title:function(items){return items.length?formatTime(items[0].parsed.x,true):"";},label:function(item){return "Price: "+formatPrice(item.parsed.y);}}}},
+ scales:{x:{type:"linear",min:bounds.min,max:bounds.max,ticks:{color:"#9eacc5",maxTicksLimit:9,callback:function(v){return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(v));}},grid:{color:"rgba(125,150,190,.13)"}},y:{ticks:{color:"#9eacc5"},grid:{color:"rgba(125,150,190,.13)"}}}
+ }});
+ $("seriesName").textContent=(activeSeries()||{}).name||"Pasted response";updateRangeButtons();attachCanvasEvents();
 }
-function showPayload(payload,source){
- lastPayload=payload;
- var candidate=findArray(payload,0);
- if(!candidate&&payload&&typeof payload==="object"&&!Array.isArray(payload))candidate=[payload];
- if(!candidate)throw new Error("JSON loaded, but no array of price observations was found. Expected rows like [timestamp, price] or objects with timestamp and price fields.");
- rows=candidate;
- configureFields(rows);
- $("rawResponse").textContent=JSON.stringify(payload,null,2).slice(0,30000);
- $("seriesName").textContent=source;
- draw();
+function applyRange(name){
+ if(!allPoints.length)return;viewRange=name;customMin=null;customMax=null;
+ if(chart){var b=rangeBounds();chart.options.scales.x.min=b.min;chart.options.scales.x.max=b.max;chart.update("none");}
+ updateRangeButtons();
 }
-function status(msg,kind){$("status").textContent=msg;$("status").className="status"+(kind?" "+kind:"");}
-$("fetchBtn").addEventListener("click",async function(){
- var raw=$("url").value.trim();
- if(!raw){status("Paste a URL first.","error");return;}
- var u;try{u=new URL(raw);}catch(e){status("That URL is not valid.","error");return;}
- if(u.protocol!=="https:"&&u.protocol!=="http:"){status("Only http:// and https:// URLs are supported.","error");return;}
- if(u.username||u.password){status("Remove any username or password from the URL. Do not put credentials in query strings.","error");return;}
- var btn=$("fetchBtn");btn.disabled=true;btn.textContent="Fetching…";status("Sending GET request from this browser…");
- var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},20000);
+function markCustom(min,max){
+ viewRange="custom";customMin=min;customMax=max;updateRangeButtons();
+ if(chart){chart.options.scales.x.min=min;chart.options.scales.x.max=max;chart.update("none");}
+}
+function attachCanvasEvents(){
+ if(canvasEventsAttached)return;var canvas=$("priceChart");canvasEventsAttached=true;
+ canvas.addEventListener("wheel",function(ev){
+  if(!chart||!allPoints.length)return;ev.preventDefault();
+  var scale=chart.scales.x,rect=canvas.getBoundingClientRect(),anchor=scale.getValueForPixel(ev.clientX-rect.left);
+  var min=chart.options.scales.x.min,max=chart.options.scales.x.max,span=max-min;
+  if(!Number.isFinite(anchor)||span<=0)return;
+  var factor=ev.deltaY<0?0.82:1.22,newSpan=Math.min(315360000000,Math.max(60000,span*factor));
+  var ratio=(anchor-min)/span,newMin=anchor-ratio*newSpan,newMax=newMin+newSpan;
+  var dataMin=allPoints[0].x,dataMax=allPoints[allPoints.length-1].x;
+  if(newMin<dataMin-31536000000){newMin=dataMin-31536000000;newMax=newMin+newSpan;}
+  if(newMax>dataMax+31536000000){newMax=dataMax+31536000000;newMin=newMax-newSpan;}
+  markCustom(newMin,newMax);
+ },{passive:false});
+ canvas.addEventListener("pointerdown",function(ev){
+  if(!chart||ev.button!==0)return;var min=chart.options.scales.x.min,max=chart.options.scales.x.max;
+  dragState={x:ev.clientX,min:min,max:max};canvas.setPointerCapture(ev.pointerId);canvas.style.cursor="grabbing";
+ });
+ canvas.addEventListener("pointermove",function(ev){
+  if(!dragState||!chart)return;var dx=ev.clientX-dragState.x,span=dragState.max-dragState.min,shift=-dx/chart.scales.x.width*span;
+  markCustom(dragState.min+shift,dragState.max+shift);
+ });
+ function endDrag(){dragState=null;canvas.style.cursor="crosshair";}
+ canvas.addEventListener("pointerup",endDrag);canvas.addEventListener("pointercancel",endDrag);canvas.addEventListener("lostpointercapture",endDrag);
+}
+function loadPayload(payload,source,preferredT,preferredP,reset){
+ var candidate=findArray(payload,0);if(!candidate&&payload&&typeof payload==="object"&&!Array.isArray(payload))candidate=[payload];
+ if(!candidate)throw new Error("No array of observations found. Expected rows like [timestamp, price] or objects containing timestamp and price.");
+ rows=candidate;configureFields(rows,preferredT,preferredP);
+ $("rawResponse").textContent=JSON.stringify(payload,null,2).slice(0,50000);
+ $("seriesName").textContent=source||"Pasted response";draw(reset!==false);
+}
+function parseAndSave(){
+ var raw=$("jsonInput").value.trim();if(!raw){setStatus("Paste the JSON response first.","error");return;}
  try{
-  var response=await fetch(u.href,{method:"GET",mode:"cors",credentials:"omit",redirect:"follow",headers:{"Accept":"application/json, text/plain, */*"},signal:controller.signal,cache:"no-store"});
-  var body=await response.text();
-  if(!response.ok)throw new Error("The server returned HTTP "+response.status+" "+response.statusText+".");
-  var payload;try{payload=JSON.parse(body);}catch(e){throw new Error("The URL returned a response, but it was not valid JSON. Response starts: "+body.slice(0,180));}
-  showPayload(payload,u.hostname);
-  status("GET successful · "+response.status+" · "+rows.length+" source rows parsed.","ok");
- }catch(e){
-  var msg=e.name==="AbortError"?"The request timed out after 20 seconds.":e.message||"Request failed.";
-  if(e instanceof TypeError)msg="The browser could not read the response. This is commonly a CORS restriction: the endpoint must explicitly allow this website's origin. Try opening the endpoint on its own, copying its JSON response, and using “Paste the JSON response directly” below.";
-  status(msg,"error");
- }finally{clearTimeout(timer);btn.disabled=false;btn.textContent="Fetch & chart";}
+  var payload=JSON.parse(raw),s=activeSeries();loadPayload(payload,s?s.name:"Pasted response",s&&s.timeField,s&&s.priceField,true);
+  if(s){s.payload=payload;s.timeField=$("timeField").value;s.priceField=$("priceField").value;s.updatedAt=Date.now();saveStorage();renderSaved();}
+  setStatus("Parsed "+allPoints.length+" valid price points"+(s?" and saved them under "+s.name:"")+".","ok");
+ }catch(e){setStatus(e.message||"Could not parse this JSON response.","error");}
+}
+$("saveSource").addEventListener("click",function(){
+ var name=$("newName").value.trim(),url=$("newUrl").value.trim();
+ if(!name){setStatus("Enter a name for this price series.","error","sourceStatus");return;}
+ try{var u=new URL(url);if(u.protocol!=="https:"&&u.protocol!=="http:")throw new Error();if(u.username||u.password)throw new Error();}catch(e){setStatus("Enter a valid http:// or https:// URL without embedded credentials.","error","sourceStatus");return;}
+ var existing=series.find(function(s){return s.id===activeId;});
+ if(existing){existing.name=name;existing.url=url;setStatus("Updated saved source.","ok","sourceStatus");}
+ else{var item={id:makeId(),name:name,url:url,payload:null,timeField:null,priceField:null};series.push(item);activeId=item.id;setStatus("Saved source. Now paste its JSON response below.","ok","sourceStatus");}
+ saveStorage();renderSaved();selectSeries(activeId);
 });
-$("jsonBtn").addEventListener("click",function(){
- var raw=$("jsonInput").value.trim();if(!raw){status("Paste JSON into the box first.","error");return;}
- try{var payload=JSON.parse(raw);showPayload(payload,"Pasted JSON");status("JSON parsed and charted successfully.","ok");}
- catch(e){status(e.message||"Could not parse JSON.","error");}
+$("parseBtn").addEventListener("click",parseAndSave);
+$("fetchBtn").addEventListener("click",async function(){
+ var s=activeSeries(),url=s?s.url:$("newUrl").value.trim();if(!url){setStatus("Select or enter a source URL first.","error");return;}
+ var u;try{u=new URL(url);}catch(e){setStatus("The saved URL is not valid.","error");return;}
+ var btn=$("fetchBtn");btn.disabled=true;btn.textContent="Fetching…";setStatus("Sending GET request from this browser…");
+ try{
+  var response=await fetch(u.href,{method:"GET",mode:"cors",credentials:"omit",headers:{"Accept":"application/json, text/plain, */*"},cache:"no-store"});
+  if(!response.ok)throw new Error("Server returned HTTP "+response.status+".");
+  var payload=await response.json();$("jsonInput").value=JSON.stringify(payload,null,2);parseAndSave();
+ }catch(e){setStatus(e instanceof TypeError?"Browser could not read this response. This is usually CORS; copy the JSON body and paste it in the box instead.":e.message,"error");}
+ finally{btn.disabled=false;btn.textContent="Try GET from saved URL";}
 });
-$("timeField").addEventListener("change",function(){try{draw();status("Chart updated using the selected fields.","ok");}catch(e){status(e.message,"error");}});
-$("priceField").addEventListener("change",function(){try{draw();status("Chart updated using the selected fields.","ok");}catch(e){status(e.message,"error");}});
+document.querySelectorAll(".range-btn[data-range]").forEach(function(b){b.addEventListener("click",function(){applyRange(b.dataset.range);});});
+$("resetView").addEventListener("click",function(){applyRange("all");});
+$("timeField").addEventListener("change",function(){try{var s=activeSeries();if(s)s.timeField=$("timeField").value;draw(false);if(s)saveStorage();}catch(e){setStatus(e.message,"error");}});
+$("priceField").addEventListener("change",function(){try{var s=activeSeries();if(s)s.priceField=$("priceField").value;draw(false);if(s)saveStorage();}catch(e){setStatus(e.message,"error");}});
+try{var stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(Array.isArray(stored))series=stored.filter(function(s){return s&&s.id&&s.name&&s.url;});}catch(e){series=[];}
+renderSaved();if(series.length)selectSeries(series[0].id);
 })();
 </script>
 </body>
