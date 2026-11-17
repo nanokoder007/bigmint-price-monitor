@@ -40,18 +40,17 @@ footer{font-size:12px;color:#899ab7;line-height:1.6;margin:22px 2px}
 <main>
 <header class="top">
  <div><h1>URL Price Graph</h1><div class="sub">Save your price sources, paste each response as JSON, and explore the data like a regular market chart.</div></div>
- <span class="badge">Manual data · saved in this browser</span>
+ <span class="badge">Shared URLs · browser-local chart data</span>
 </header>
 
 <section class="panel">
- <h2>1. Saved price sources</h2>
- <div class="formgrid">
-  <div><label class="label" for="newName">Series name</label><input id="newName" placeholder="e.g. BigMint Ferrous"></div>
-  <div><label class="label" for="newUrl">Website / API URL</label><input id="newUrl" type="url" spellcheck="false" placeholder="https://example.com/prices"></div>
-  <button id="saveSource">+ Save source</button>
+ <div class="toolbar"><h2 style="margin:0">1. Shared price sources</h2><span class="badge">Loaded from GitHub</span></div>
+ <div class="note">All devices load the same shared URL list from <b>docs/sources.json</b>. To add, rename or remove a source for everyone, edit that file on GitHub and commit the change. Sources saved previously on this browser remain marked as local until you publish them.</div>
+ <div class="toolbar" style="margin-top:13px">
+  <a class="btn" href="https://github.com/nanokoder007/bigmint-price-monitor/edit/main/docs/sources.json" target="_blank" rel="noopener">Manage shared URLs on GitHub</a>
+  <button id="publishSources" class="secondary">Copy this browser's URLs for GitHub</button>
  </div>
- <div class="hint">Save a name and its URL once. Use Copy URL when you need to fetch the JSON manually. Your saved source list and pasted data remain in this browser, not on the website server.</div>
- <div id="savedList" class="saved-list"><div class="empty">No saved sources yet. Add your first source above.</div></div>
+ <div id="savedList" class="saved-list"><div class="empty">Loading shared price sources…</div></div>
  <div id="sourceStatus" class="status" role="status"></div>
 </section>
 
@@ -149,14 +148,16 @@ function renderSaved(){
  series.forEach(function(s){
   var item=document.createElement("div");item.className="saved-item"+(s.id===activeId?" active":"");
   var meta=document.createElement("div");meta.className="saved-meta";
-  var name=document.createElement("div");name.className="saved-name";name.textContent=s.name;
+  var name=document.createElement("div");name.className="saved-name";name.textContent=s.name+(s.shared?" · SHARED":" · THIS BROWSER ONLY");
   var url=document.createElement("div");url.className="saved-url";url.textContent=s.url;
   meta.append(name,url);
   var actions=document.createElement("div");actions.className="saved-actions";
   var open=document.createElement("button");open.className="secondary";open.textContent=s.id===activeId?"Selected":"Open";open.addEventListener("click",function(){selectSeries(s.id);});
   var copy=document.createElement("button");copy.className="secondary";copy.textContent="Copy URL";copy.addEventListener("click",function(){copyUrl(s.url);});
-  var del=document.createElement("button");del.className="danger";del.textContent="Delete";del.addEventListener("click",function(){deleteSeries(s.id);});
-  actions.append(open,copy,del);item.append(meta,actions);host.appendChild(item);
+  actions.append(open,copy);
+  if(!s.shared){var del=document.createElement("button");del.className="danger";del.textContent="Delete local copy";del.addEventListener("click",function(){deleteSeries(s.id);});actions.append(del);}
+  item.title=s.shared?"This source is shared through GitHub.":"This source exists only in this browser until published to GitHub.";
+  item.append(meta,actions);host.appendChild(item);
  });
 }
 async function copyUrl(url){
@@ -334,7 +335,54 @@ $("resetView").addEventListener("click",function(){applyRange("all");});
 $("timeField").addEventListener("change",function(){try{var s=activeSeries();if(s)s.timeField=$("timeField").value;draw(false);if(s)saveStorage();}catch(e){setStatus(e.message,"error");}});
 $("priceField").addEventListener("change",function(){try{var s=activeSeries();if(s)s.priceField=$("priceField").value;draw(false);if(s)saveStorage();}catch(e){setStatus(e.message,"error");}});
 try{var stored=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(Array.isArray(stored))series=stored.filter(function(s){return s&&s.id&&s.name&&s.url;});}catch(e){series=[];}
-renderSaved();if(series.length)selectSeries(series[0].id);
+
+function loadSharedSources(){
+ var localCopies=series.slice();
+ var oldActive=localCopies.find(function(s){return s.id===activeId;});
+ var oldActiveUrl=oldActive?oldActive.url:null;
+ fetch("sources.json?ts="+Date.now(),{cache:"no-store"}).then(function(response){
+  if(!response.ok)throw new Error("Could not load docs/sources.json (HTTP "+response.status+").");
+  return response.json();
+ }).then(function(config){
+  if(!Array.isArray(config))throw new Error("docs/sources.json must contain a JSON array of source objects.");
+  var usedUrls={};
+  var shared=config.filter(function(s){return s&&typeof s.name==="string"&&typeof s.url==="string";}).map(function(s){
+   var old=localCopies.find(function(x){return x.url===s.url;});
+   usedUrls[s.url]=true;
+   return {id:String(s.id||makeId()),name:s.name,url:s.url,shared:true,
+    payload:old&&old.payload?old.payload:null,
+    timeField:old&&old.timeField?old.timeField:null,
+    priceField:old&&old.priceField?old.priceField:null,
+    updatedAt:old&&old.updatedAt?old.updatedAt:null};
+  });
+  var localOnly=localCopies.filter(function(s){return !usedUrls[s.url];}).map(function(s){s.shared=false;return s;});
+  series=shared.concat(localOnly);
+  renderSaved();
+  var active=oldActiveUrl&&series.find(function(s){return s.url===oldActiveUrl;});
+  if(!active&&series.length)active=series[0];
+  if(active)selectSeries(active.id);
+  else{clearGraph();$("activeName").textContent="No source selected";}
+  setStatus("Loaded "+shared.length+" shared source(s) from GitHub"+(localOnly.length?"; "+localOnly.length+" source(s) are still local to this browser.":"."),"ok","sourceStatus");
+ }).catch(function(error){
+  series=localCopies.map(function(s){s.shared=false;return s;});
+  renderSaved();
+  if(series.length)selectSeries(series[0].id);
+  setStatus("Could not load the shared source list: "+error.message+" Local browser sources are still available.","error","sourceStatus");
+ });
+}
+
+$("publishSources").addEventListener("click",async function(){
+ var exported=series.map(function(s){return {id:s.id,name:s.name,url:s.url};});
+ if(!exported.length){setStatus("There are no sources to publish yet.","error","sourceStatus");return;}
+ try{
+  await navigator.clipboard.writeText(JSON.stringify(exported,null,2));
+  window.open("https://github.com/nanokoder007/bigmint-price-monitor/edit/main/docs/sources.json","_blank","noopener");
+  setStatus("Copied "+exported.length+" source(s). In the GitHub editor, replace the file contents with the copied JSON and commit. That will make the URL list shared across devices.","ok","sourceStatus");
+ }catch(error){
+  setStatus("Clipboard access was blocked. Use Manage shared URLs on GitHub and copy this source list from your browser's storage manually.","error","sourceStatus");
+ }
+});
+loadSharedSources();
 })();
 </script>
 </body>
