@@ -10,9 +10,34 @@ DOCS_CONFIG = os.path.join(ROOT, "docs", "sources.json")
 HISTORY = os.path.join(ROOT, "docs", "data", "history.json")
 
 def fetch(url):
-    req = Request(url, headers={"User-Agent": "Mozilla/5.0 (compatible; PriceHistoryBot/1.0)", "Accept": "application/json,text/plain,*/*"})
-    with urlopen(req, timeout=30) as response:
-        return json.loads(response.read().decode("utf-8"))
+    # Send a same-origin XHR-style request similar to the BigMint page.
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+        "Accept": "application/json, text/plain, */*",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.bigmint.co/",
+        "Origin": "https://www.bigmint.co",
+        "X-Requested-With": "XMLHttpRequest",
+        "Sec-Fetch-Dest": "empty",
+        "Sec-Fetch-Mode": "cors",
+        "Sec-Fetch-Site": "same-origin",
+    }
+    # Optional: add a current BigMint session cookie through a GitHub Actions secret.
+    cookie = os.environ.get("BIGMINT_COOKIE", "").strip()
+    if cookie:
+        headers["Cookie"] = cookie
+    req = Request(url, headers=headers)
+    try:
+        with urlopen(req, timeout=30) as response:
+            return json.loads(response.read().decode("utf-8"))
+    except Exception as exc:
+        # Print enough diagnostic detail to identify a WAF/auth response,
+        # while avoiding printing request headers or session cookies.
+        from urllib.error import HTTPError
+        if isinstance(exc, HTTPError):
+            body = exc.read(1000).decode("utf-8", "replace")
+            print(f"BigMint HTTP {exc.code}; server={exc.headers.get('Server', 'unknown')}; response={body[:1000]}", file=sys.stderr)
+        raise
 
 def normalize_ts(value):
     ts = int(float(value))
