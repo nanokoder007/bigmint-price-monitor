@@ -1,0 +1,10 @@
+{
+  "sources": [
+    {
+      "id": "bigmint-ferrous-1038",
+      "name": "BigMint Ferrous",
+      "url": "https://www.bigmint.co/prices_tg/graph/1038/INR/f?market=ferrous",
+      "unit": "INR"
+    }
+  ]
+}
