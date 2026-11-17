@@ -71,6 +71,7 @@ footer{font-size:12px;color:#899ab7;line-height:1.6;margin:22px 2px}
   <div><h2 style="margin:0 0 4px">3. Interactive price chart</h2><div class="small" style="margin:0">Scroll to zoom · drag left/right to pan · hover for exact values</div></div>
   <div class="ranges" id="rangeButtons">
    <button class="range-btn" data-range="1h">1H</button><button class="range-btn" data-range="4h">4H</button><button class="range-btn" data-range="12h">12H</button><button class="range-btn" data-range="1d">1D</button><button class="range-btn" data-range="1m">1M</button><button class="range-btn active" data-range="all">ALL</button>
+   <button class="range-btn" id="zoomOut" title="Zoom out">−</button><button class="range-btn" id="zoomIn" title="Zoom in">+</button>
    <button class="range-btn" id="resetView" title="Reset chart view">Reset</button>
   </div>
  </div>
@@ -219,6 +220,13 @@ function applyRange(name){
  if(chart){var b=rangeBounds();chart.options.scales.x.min=b.min;chart.options.scales.x.max=b.max;chart.update("none");}
  updateRangeButtons();
 }
+function zoomBy(factor){
+ if(!chart||!allPoints.length)return;
+ var min=chart.options.scales.x.min,max=chart.options.scales.x.max,span=max-min,mid=(min+max)/2;
+ if(!Number.isFinite(span)||span<=0)return;
+ var next=Math.min(315360000000,Math.max(60000,span*factor));
+ markCustom(mid-next/2,mid+next/2);
+}
 function markCustom(min,max){
  viewRange="custom";customMin=min;customMax=max;updateRangeButtons();
  if(chart){chart.options.scales.x.min=min;chart.options.scales.x.max=max;chart.update("none");}
@@ -284,6 +292,8 @@ $("fetchBtn").addEventListener("click",async function(){
  finally{btn.disabled=false;btn.textContent="Try GET from saved URL";}
 });
 document.querySelectorAll(".range-btn[data-range]").forEach(function(b){b.addEventListener("click",function(){applyRange(b.dataset.range);});});
+$("zoomIn").addEventListener("click",function(){zoomBy(0.7);});
+$("zoomOut").addEventListener("click",function(){zoomBy(1.4);});
 $("resetView").addEventListener("click",function(){applyRange("all");});
 $("timeField").addEventListener("change",function(){try{var s=activeSeries();if(s)s.timeField=$("timeField").value;draw(false);if(s)saveStorage();}catch(e){setStatus(e.message,"error");}});
 $("priceField").addEventListener("change",function(){try{var s=activeSeries();if(s)s.priceField=$("priceField").value;draw(false);if(s)saveStorage();}catch(e){setStatus(e.message,"error");}});
