@@ -308,17 +308,9 @@ function parseAndSave(){
   setStatus("Parsed "+allPoints.length.toLocaleString("en-IN")+" valid price points"+(s?" and saved them under "+s.name:"")+".","ok");
  }catch(e){setStatus(e.message||"Could not parse this JSON response.","error");}
 }
-$("saveSource").addEventListener("click",function(){
- var name=$("newName").value.trim(),url=$("newUrl").value.trim();
- if(!name){setStatus("Enter a name for this price series.","error","sourceStatus");return;}
- try{var u=new URL(url);if(u.protocol!=="https:"&&u.protocol!=="http:")throw new Error();if(u.username||u.password)throw new Error();}catch(e){setStatus("Enter a valid http:// or https:// URL without embedded credentials.","error","sourceStatus");return;}
- var item={id:makeId(),name:name,url:url,payload:null,timeField:null,priceField:null};series.push(item);activeId=item.id;
- setStatus("Saved a new source. Now paste its JSON response below.","ok","sourceStatus");
- saveStorage();renderSaved();selectSeries(activeId);
-});
 $("parseBtn").addEventListener("click",parseAndSave);
 $("fetchBtn").addEventListener("click",async function(){
- var s=activeSeries(),url=s?s.url:$("newUrl").value.trim();if(!url){setStatus("Select or enter a source URL first.","error");return;}
+ var s=activeSeries(),url=s?s.url:"";if(!url){setStatus("Select a shared or local source first.","error");return;}
  var u;try{u=new URL(url);}catch(e){setStatus("The saved URL is not valid.","error");return;}
  var btn=$("fetchBtn");btn.disabled=true;btn.textContent="Fetching…";setStatus("Sending GET request from this browser…");
  try{
