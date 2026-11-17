@@ -363,16 +363,19 @@ function loadSharedSources(){
  });
 }
 
-$("publishSources").addEventListener("click",async function(){
+$("publishSources").addEventListener("click",function(){
  var exported=series.map(function(s){return {id:s.id,name:s.name,url:s.url};});
  if(!exported.length){setStatus("There are no sources to publish yet.","error","sourceStatus");return;}
- try{
-  await navigator.clipboard.writeText(JSON.stringify(exported,null,2));
-  window.open("https://github.com/nanokoder007/bigmint-price-monitor/edit/main/docs/sources.json","_blank","noopener");
-  setStatus("Copied "+exported.length+" source(s). In the GitHub editor, replace the file contents with the copied JSON and commit. That will make the URL list shared across devices.","ok","sourceStatus");
- }catch(error){
-  setStatus("Clipboard access was blocked. Use Manage shared URLs on GitHub and copy this source list from your browser's storage manually.","error","sourceStatus");
+ window.open("https://github.com/nanokoder007/bigmint-price-monitor/edit/main/docs/sources.json","_blank","noopener");
+ if(!navigator.clipboard||!navigator.clipboard.writeText){
+  setStatus("GitHub editor opened, but clipboard access is unavailable. Copy the URL list from this browser using a secure browser context, then paste it into docs/sources.json.","error","sourceStatus");
+  return;
  }
+ navigator.clipboard.writeText(JSON.stringify(exported,null,2)).then(function(){
+  setStatus("Copied "+exported.length+" source(s). Paste the JSON into the GitHub editor, then commit. That makes the URL list shared across devices.","ok","sourceStatus");
+ }).catch(function(){
+  setStatus("GitHub editor opened, but clipboard access was blocked. Copy the source list from this browser manually, then paste it into docs/sources.json.","error","sourceStatus");
+ });
 });
 loadSharedSources();
 })();
