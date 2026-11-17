@@ -26,6 +26,8 @@ jobs:
         with:
           python-version: "3.x"
       - name: Collect and store prices
+        env:
+          BIGMINT_COOKIE: ${{ secrets.BIGMINT_COOKIE }}
         run: python scripts/collect.py
       - name: Commit updated history
         run: |
