@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BigMint Price Monitor</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+<style>
+:root{color-scheme:dark;font-family:Inter,system-ui,Arial,sans-serif;background:#0b1020;color:#e8edf8}
+*{box-sizing:border-box}body{margin:0;padding:32px 18px;background:radial-gradient(ellipse at top,#172344 0,#0b1020 55%);min-height:100vh}
+main{max-width:1150px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.muted{color:#9ba9c5;font-size:14px}
+button{border:1px solid #45608e;background:#20355d;color:#fff;padding:11px 16px;border-radius:10px;font-weight:650;cursor:pointer}button:hover{background:#2d4778}
+.panel{margin-top:24px;background:#111a2e;border:1px solid #263653;border-radius:16px;padding:20px;box-shadow:0 18px 55px #0003}
+.stats{display:flex;gap:28px;flex-wrap:wrap;margin:16px 0 4px}.stat strong{display:block;font-size:25px;margin-top:4px}.stat span{font-size:12px;color:#9ba9c5}
+.chart-wrap{height:420px;position:relative;margin-top:15px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+select{background:#182744;color:#e8edf8;border:1px solid #3a4d70;padding:9px;border-radius:8px}
+#status{margin-top:12px;color:#9ba9c5;font-size:13px}.sources{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pill{border:1px solid #354969;border-radius:100px;padding:6px 10px;font-size:12px;color:#bdc9df}
+@media(max-width:600px){body{padding:22px 12px}.panel{padding:14px}.chart-wrap{height:330px}}
+</style></head>
+<body><main>
+<div class="top"><div><h1>BigMint Price Monitor</h1><div class="muted">Automated price history · India Standard Time</div></div><button id="reload">↻ Reload latest data</button></div>
+<section class="panel">
+<div class="toolbar"><div><div class="muted">PRICE SERIES</div><div id="sources" class="sources"></div></div><select id="range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="0">All history</option></select></div>
+<div class="stats"><div class="stat"><span>LATEST PRICE</span><strong id="latest">—</strong></div><div class="stat"><span>LAST RECORDED</span><strong id="lastTime" style="font-size:16px">—</strong></div><div class="stat"><span>DATA POINTS</span><strong id="count">0</strong></div></div>
+<div class="chart-wrap"><canvas id="chart"></canvas></div><div id="status">Loading price history…</div>
+</section>
+<p class="muted">Collection runs four times daily (12 AM, 6 AM, 12 PM and 6 PM IST). Scheduled runs may be delayed by GitHub Actions. The reload button fetches the latest published data; to trigger a new collection, use the workflow in the repository’s Actions tab.</p>
+</main>
+<script>
+let chart;
+const fmt = n => new Intl.NumberFormat('en-IN',{maximumFractionDigits:2}).format(n);
+const dt = n => new Intl.DateTimeFormat('en-IN',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kolkata'}).format(new Date(n));
+async function load(){
+ const status=document.getElementById('status');status.textContent='Loading…';
+ try{
+  const [sres,hres]=await Promise.all([fetch('sources.json?t='+Date.now()),fetch('data/history.json?t='+Date.now())]);
+  if(!sres.ok||!hres.ok)throw new Error('Could not load dashboard data');
+  const cfg=await sres.json(),hist=await hres.json(),names=cfg.sources||[];
+  const datasets=[],pills=[];let latest=null,total=0;
+  const cutoff=Number(document.getElementById('range').value);
+  for(const src of names){
+   const pts=(hist.sources?.[src.id]||[]).map(p=>({x:Number(p[0]),y:Number(p[1])})).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
+   total+=pts.length;
+   if(pts.length){const last=pts[pts.length-1];if(!latest||last.x>latest.x)latest={...last,name:src.name};}
+   const visible=cutoff?pts.filter(p=>p.x>=Date.now()-cutoff*86400000):pts;
+   datasets.push({label:src.name,data:visible,borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:.18,fill:false});
+   pills.push('<span class="pill">'+src.name.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</span>');
+  }
+  document.getElementById('sources').innerHTML=pills.join('');
+  document.getElementById('latest').textContent=latest?fmt(latest.y):'—';
+  document.getElementById('lastTime').textContent=latest?dt(latest.x):'—';
+  document.getElementById('count').textContent=total.toLocaleString('en-IN');
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById('chart'),{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{labels:{color:'#c8d3e8'}},tooltip:{callbacks:{title:items=>items.length?dt(items[0].parsed.x):'',label:item=>item.dataset.label+': '+fmt(item.parsed.y)}}},scales:{x:{type:'time',time:{tooltipFormat:'PPpp'},ticks:{color:'#9ba9c5',maxRotation:0},grid:{color:'#263653'}},y:{ticks:{color:'#9ba9c5'},grid:{color:'#263653'}}}}});
+  const updated=hist.updatedAt?dt(hist.updatedAt):'not yet collected';
+  status.textContent='History last updated: '+updated+'. '+(total?total+' stored observations.':'No observations yet — run the collection workflow once.');
+ }catch(e){status.textContent='Error: '+e.message+'. Check that GitHub Pages is enabled and the workflow has run.';}
+}
+document.getElementById('reload').addEventListener('click',load);
+document.getElementById('range').addEventListener('change',load);
+load();
+</script></body></html>
