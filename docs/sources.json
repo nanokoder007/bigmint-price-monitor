@@ -1,0 +1,12 @@
+[
+  {
+    "id": "bigmint-ferrous-1038",
+    "name": "BigMint Ferrous (1038)",
+    "url": "https://www.bigmint.co/prices_tg/graph/1038/INR/f?market=ferrous"
+  },
+  {
+    "id": "bigmint-nonferrous-1809",
+    "name": "BigMint Non-Ferrous (1809)",
+    "url": "https://www.bigmint.co/prices_tg/graph/1809/INR/f?market=non-ferrous"
+  }
+]
