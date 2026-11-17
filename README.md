@@ -1,20 +1,29 @@
-# BigMint Price Monitor
+# URL Price Graph
 
-A GitHub Pages dashboard shell for charting price history. Automated BigMint collection is currently paused pending written authorization for programmatic API access.
+A browser-only GitHub Pages tool. Paste a JSON GET endpoint, fetch it manually, and plot timestamp versus price. No scheduler, backend proxy, or response storage is used.
 
-## Setup
+## Open the website
 
-1. In **Settings → Pages**, choose **Deploy from a branch**, select branch `main`, folder `/docs`, then Save.
-2. The dashboard can display historical data in `docs/data/history.json`.
-3. To enable automatic updates, first obtain written approval and the official API endpoint/authentication terms from BigMint. Then connect an approved API integration.
+https://nanokoder007.github.io/bigmint-price-monitor/
 
-## Adding more price series
+## How to use
 
-Edit `sources.json` in the repository root and add another item to the `sources` array. Use a unique `id`, display `name`, and BigMint graph `url`. The workflow copies this configuration to `docs/sources.json` for the dashboard.
+1. Paste a JSON endpoint URL into **GET endpoint**.
+2. Click **Fetch & chart**.
+3. The app looks for rows such as `[[timestamp, price], ...]` or objects with timestamp and price fields.
+4. Use the timestamp and price selectors to correct the field mapping if needed.
+5. The graph, latest value, last observation time, and recent readings are shown below.
 
-## Data and privacy
+You can alternatively expand **Paste the JSON response directly**, paste a JSON response body, and click **Parse pasted JSON**.
 
-This is a public repository. Collected prices and source URLs are published in the repository. Do not add credentials or private data. 
-## BigMint data access
+Timestamps expressed in seconds are converted to milliseconds; millisecond timestamps are retained. ISO date strings are also supported. Dates are shown in India Standard Time (Asia/Kolkata).
 
-BigMint's published terms restrict scripted extraction, scraping, and regular downloading of its website content without prior written consent. Its historical-data page describes API plug-ins as case-by-case and subject to approval. This repository therefore does not run a scheduled scraper. Do not add cookies, passwords, or API tokens to source files. Once BigMint provides an approved API, connect it through a server-side function and store any credential as a private deployment secret.
+## Browser/CORS limitation
+
+The GET request is made directly by your browser. For a cross-origin URL, the server must allow the GitHub Pages origin using CORS response headers. The website does not bypass CORS, authentication, or other access controls. It does not send cookies or credentials and it does not proxy requests through a server.
+
+If the endpoint does not allow browser CORS access, retrieve the JSON using a method you are authorized to use and paste the response body into the JSON box.
+
+## Privacy
+
+Your URL and response are processed in the browser tab only. The app does not save them to a database or send them to this repository. Avoid putting passwords, session cookies, or private API keys into URLs.
