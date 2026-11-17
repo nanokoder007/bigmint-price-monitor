@@ -20,13 +20,13 @@ select{background:#182744;color:#e8edf8;border:1px solid #3a4d70;padding:9px;bor
 @media(max-width:600px){body{padding:22px 12px}.panel{padding:14px}.chart-wrap{height:330px}}
 </style></head>
 <body><main>
-<div class="top"><div><h1>BigMint Price Monitor</h1><div class="muted">Automated price history · India Standard Time</div></div><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="action" href="https://github.com/nanokoder007/bigmint-price-monitor/actions/workflows/collect.yml">▶ Collect now</a><button id="reload">↻ Reload latest data</button></div></div>
+<div class="top"><div><h1>BigMint Price Monitor</h1><div class="muted">Automated price history · India Standard Time</div></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button id="reload">↻ Reload latest data</button></div></div>
 <section class="panel">
 <div class="toolbar"><div><div class="muted">PRICE SERIES</div><div id="sources" class="sources"></div></div><select id="range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="0">All history</option></select></div>
 <div class="stats"><div class="stat"><span>LATEST PRICE</span><strong id="latest">—</strong></div><div class="stat"><span>LAST RECORDED</span><strong id="lastTime" style="font-size:16px">—</strong></div><div class="stat"><span>DATA POINTS</span><strong id="count">0</strong></div></div>
 <div class="chart-wrap"><canvas id="chart"></canvas></div><div id="status">Loading price history…</div>
 </section>
-<p class="muted">Collection runs four times daily (12 AM, 6 AM, 12 PM and 6 PM IST). Scheduled runs may be delayed by GitHub Actions. “Collect now” opens the GitHub Actions workflow page; click “Run workflow” there to start a new collection. “Reload latest data” fetches the latest published history.</p>
+<p class="muted">Collection runs four times daily (12 AM, 6 AM, 12 PM and 6 PM IST). Scheduled runs may be delayed by GitHub Actions. Automatic collection is paused pending approved BigMint API access. “Reload latest data” fetches the latest published history.</p>
 </main>
 <script>
 let chart;
