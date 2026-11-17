@@ -68,7 +68,7 @@ footer{font-size:12px;color:#899ab7;line-height:1.6;margin:22px 2px}
 
 <section class="panel">
  <div class="toolbar">
-  <div><h2 style="margin:0 0 4px">3. Interactive price chart</h2><div class="small" style="margin:0">Scroll to zoom · drag left/right to pan · hover for exact values</div></div>
+  <div><div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><h2 style="margin:0">3. Interactive price chart</h2><span id="seriesName" class="badge">No data loaded</span></div><div class="small" style="margin-top:6px">Scroll to zoom · drag left/right to pan · hover for exact values</div></div>
   <div class="ranges" id="rangeButtons">
    <button class="range-btn" data-range="1h">1H</button><button class="range-btn" data-range="4h">4H</button><button class="range-btn" data-range="12h">12H</button><button class="range-btn" data-range="1d">1D</button><button class="range-btn" data-range="1m">1M</button><button class="range-btn active" data-range="all">ALL</button>
    <button class="range-btn" id="zoomOut" title="Zoom out">−</button><button class="range-btn" id="zoomIn" title="Zoom in">+</button>
@@ -101,7 +101,7 @@ var preferredTime=["timestamp","time","datetime","date","ts","x","t","created_at
 var preferredPrice=["price","value","rate","close","amount","y","last","p"];
 var durations={"1h":3600000,"4h":14400000,"12h":43200000,"1d":86400000,"1m":2592000000};
 function makeId(){return "s"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
-function setStatus(message,kind,target){var el=$(target||"status");el.textContent=message;el.className="status"+(kind?" "+kind:"");}
+function setStatus(message,kind,target){var el=$(target||"status");if(!el)return;el.textContent=message;el.className="status"+(kind?" "+kind:"");}
 function formatTime(ms,seconds){return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",second:seconds?"2-digit":undefined,hour12:true}).format(new Date(ms));}
 function formatPrice(v){return new Intl.NumberFormat("en-IN",{maximumFractionDigits:4}).format(v);}
 function numberTime(v){
