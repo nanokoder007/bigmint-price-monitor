@@ -1,32 +1,32 @@
 [
   {
     "id": "bigmint-ferrous-1038",
-    "name": "BigMint DAP DURGAPUR HMS-80:20",
+    "name": "BigMint Ferrous (1038)",
     "url": "https://www.bigmint.co/prices_tg/graph/1038/INR/f?market=ferrous"
   },
   {
     "id": "bigmint-nonferrous-1809",
-    "name": "BigMint Non-Ferrous UBC - EX DELHI ",
+    "name": "BigMint Non-Ferrous (1809)",
     "url": "https://www.bigmint.co/prices_tg/graph/1809/INR/f?market=non-ferrous"
   },
   {
-    "id": "bigmint-nonferrous-uk",
-    "name": "BigMint UBC non ferrous UK ORigin ",
-    "url": "https://www.bigmint.co/prices_tg/graph/5548/USD/cnf?market=non-ferrous"
-  },
-  {
-    "id": "bigmint-dapchennai-1048",
+    "id": "smwkib15ls7fgfy",
     "name": "BIGMINT - DAP Chennai HMS 80:20",
     "url": "https://www.bigmint.co/prices_tg/graph/1048/INR/f?market=ferrous"
   },
   {
-    "id": "bigmint-dapraipur-1041",
-    "name": "BIGMINT - DAP Raipur HMS 80:20 ",
+    "id": "smwkiceygkpjwc3",
+    "name": "BIGMINT - DAP RaipurHMS 80:20",
     "url": "https://www.bigmint.co/prices_tg/graph/1041/INR/f?market=ferrous"
   },
-   {
-    "id": "bigmint-dapraipur-1373",
+  {
+    "id": "smwkih2hpsxm8kc",
     "name": "BIGMINT - DAP Hyderabad HMS 80:20",
     "url": "https://www.bigmint.co/prices_tg/graph/1373/INR/f?market=ferrous"
+  },
+  {
+    "id": "smwkiu89t4ik0ws",
+    "name": "BIGMINT - UBC NHAVASHIVA UK ORIGIN",
+    "url": "https://www.bigmint.co/prices_tg/graph/5548/USD/cnf?market=non-ferrous"
   }
 ]
