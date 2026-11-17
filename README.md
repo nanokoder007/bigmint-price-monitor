@@ -18,3 +18,9 @@ Edit `sources.json` in the repository root and add another item to the `sources`
 ## Data and privacy
 
 This is a public repository. Collected prices and source URLs are published in the repository. Do not add credentials or private data. The collector expects BigMint's graph response to contain a `point` array of [timestamp, price] pairs. If BigMint changes its response format or blocks automated requests, the workflow will report an error and collection may stop until adjusted.
+
+## Troubleshooting: HTTP 403
+
+If the GitHub Actions collector returns HTTP 403 from BigMint's CDN, the request is being refused before the price data is returned. The collector now sends browser-style headers and supports an optional Actions secret named `BIGMINT_COOKIE`, but a browser session cookie may expire and may still not work if BigMint blocks hosted-runner traffic.
+
+For reliable automated collection, ask BigMint for an approved API integration or access to an API endpoint, and whether GitHub Actions runner traffic can be authorized. BigMint describes its historical-data API plug-in as case-by-case and subject to approval. Do not paste account passwords or session cookies into source files or chat. If BigMint supplies an authorized credential, store it under **Settings → Secrets and variables → Actions** as `BIGMINT_COOKIE` (only when BigMint confirms this is an acceptable authentication method).
