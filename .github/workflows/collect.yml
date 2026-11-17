@@ -1,6 +1,11 @@
 name: Collect BigMint prices
 
 on:
+  push:
+    paths:
+      - "scripts/collect.py"
+      - "sources.json"
+      - ".github/workflows/collect.yml"
   schedule:
     - cron: "30 18 * * *" # 12:00 AM IST
     - cron: "30 0 * * *"  # 6:00 AM IST
