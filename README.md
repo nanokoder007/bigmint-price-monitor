@@ -1,29 +1,26 @@
 # URL Price Graph
 
-A browser-only GitHub Pages tool. Paste a JSON GET endpoint, fetch it manually, and plot timestamp versus price. No scheduler, backend proxy, or response storage is used.
+A mobile-friendly, browser-only GitHub Pages tool for saving price-source URLs, pasting JSON responses, and exploring timestamp-versus-price charts.
 
 ## Open the website
 
 https://nanokoder007.github.io/bigmint-price-monitor/
 
-## How to use
+## Use it
 
-1. Paste a JSON endpoint URL into **GET endpoint**.
-2. Click **Fetch & chart**.
-3. The app looks for rows such as `[[timestamp, price], ...]` or objects with timestamp and price fields.
-4. Use the timestamp and price selectors to correct the field mapping if needed.
-5. The graph, latest value, last observation time, and recent readings are shown below.
+1. Add a **Series name** and its **Website / API URL**, then select **Save source**.
+2. Copy the saved URL when you need to retrieve its data.
+3. Paste the JSON response into the response box and choose **Parse & save data**.
+4. Switch between saved series using their **Open** buttons. Each series retains its own pasted JSON in this browser.
+5. Use **1H**, **4H**, **12H**, **1D**, **1M**, or **ALL** to change the visible time window.
+6. On desktop, scroll over the graph to zoom and drag horizontally to pan. On a phone or tablet, drag across the graph to pan; the chart controls remain usable on a narrow screen. Use **Reset** to return to the full series.
 
-You can alternatively expand **Paste the JSON response directly**, paste a JSON response body, and click **Parse pasted JSON**.
+The chart accepts arrays like `[[timestamp, price], ...]` and arrays of objects with timestamp and price fields. You can change the timestamp and price selectors when automatic field detection needs adjustment. Numeric Unix timestamps in seconds or milliseconds and ISO date strings are supported. Displayed times use Asia/Kolkata (IST).
 
-Timestamps expressed in seconds are converted to milliseconds; millisecond timestamps are retained. ISO date strings are also supported. Dates are shown in India Standard Time (Asia/Kolkata).
+## Browser / CORS limitation
 
-## Browser/CORS limitation
+The optional direct GET runs in your browser. For a cross-origin endpoint, its server must allow the site's origin through CORS. The app does not bypass CORS, authentication, or access controls. When direct GET is blocked, paste the JSON response body instead.
 
-The GET request is made directly by your browser. For a cross-origin URL, the server must allow the GitHub Pages origin using CORS response headers. The website does not bypass CORS, authentication, or other access controls. It does not send cookies or credentials and it does not proxy requests through a server.
+## Local privacy and storage
 
-If the endpoint does not allow browser CORS access, retrieve the JSON using a method you are authorized to use and paste the response body into the JSON box.
-
-## Privacy
-
-Your URL and response are processed in the browser tab only. The app does not save them to a database or send them to this repository. Avoid putting passwords, session cookies, or private API keys into URLs.
+Saved source names, URLs, field mappings, and pasted JSON are stored in your browser's local storage on this device. They are not uploaded to a server. Clearing this site's browser data removes the saved series. Avoid including passwords, session cookies, or private API keys in saved URLs.
