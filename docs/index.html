@@ -264,28 +264,39 @@ function loadPayload(payload,source,preferredT,preferredP,reset){
  $("seriesName").textContent=source||"Pasted response";draw(reset!==false);
 }
 function parseJsonInput(raw){
- var text=String(raw||"").replace(/^\\uFEFF/,"").trim();
- // Clipboard content is often wrapped in Markdown fences such as ```json ... ```.
- text=text.replace(/^\x60\x60\x60(?:json|javascript|js|text)?\\s*/i,"").replace(/\\s*\x60\x60\x60$/,"").trim();
+ var text=String(raw||"").replace(/^\uFEFF/,"").trim();
+ // Remove Markdown code fences commonly added when copying formatted JSON.
+ var fence=String.fromCharCode(96,96,96);
+ if(text.slice(0,3)===fence){
+  var firstLineEnd=text.indexOf("\n");
+  if(firstLineEnd>=0)text=text.slice(firstLineEnd+1);
+  if(text.slice(-3)===fence)text=text.slice(0,-3);
+  text=text.trim();
+ }
  try{return JSON.parse(text);}catch(firstError){}
- // Also accept a JSON object/array copied with a short label before or after it.
- var start=-1;
- for(var i=0;i<text.length;i++){if(text[i]==="{"||text[i]==="["){start=i;break;}}
- if(start<0)throw new Error("No JSON object or array found. Paste the complete response body.");
- var stack=[],quoted=false,escaped=false,end=-1;
- for(var j=start;j<text.length;j++){
+ // Accept JSON surrounded by a short label or explanation.
+ var jsonStart=-1;
+ for(var i=0;i<text.length;i++){if(text[i]==="{"||text[i]==="["){jsonStart=i;break;}}
+ if(jsonStart<0)throw new Error("No JSON object or array found. Paste the complete response body.");
+ var stack=[],quoted=false,escaped=false,jsonEnd=-1;
+ for(var j=jsonStart;j<text.length;j++){
   var ch=text[j];
-  if(quoted){if(escaped){escaped=false;continue;}if(ch==="\\\\"){escaped=true;continue;}if(ch==='"'){quoted=false;}continue;}
+  if(quoted){
+   if(escaped){escaped=false;continue;}
+   if(ch==="\\"){escaped=true;continue;}
+   if(ch==='"'){quoted=false;}
+   continue;
+  }
   if(ch==='"'){quoted=true;continue;}
   if(ch==="{"||ch==="["){stack.push(ch);continue;}
   if(ch==="}"||ch==="]"){
    var open=stack.pop();
    if((ch==="}"&&open!=="{")||(ch==="]"&&open!=="["))throw new Error("The JSON brackets do not match. Copy the full response again.");
-   if(stack.length===0){end=j+1;break;}
+   if(stack.length===0){jsonEnd=j+1;break;}
   }
  }
- if(end<0)throw new Error("The JSON looks incomplete. Make sure the full response, including its closing bracket, was copied.");
- try{return JSON.parse(text.slice(start,end));}
+ if(jsonEnd<0)throw new Error("The JSON looks incomplete. Make sure the full response, including its closing bracket, was copied.");
+ try{return JSON.parse(text.slice(jsonStart,jsonEnd));}
  catch(e){throw new Error("The copied text is not valid JSON: "+e.message);}
 }
 function parseAndSave(){
