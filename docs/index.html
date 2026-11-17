@@ -1,64 +1,227 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>BigMint Price Monitor</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script>
-<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1020">
+<title>URL Price Graph</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
 <style>
-:root{color-scheme:dark;font-family:Inter,system-ui,Arial,sans-serif;background:#0b1020;color:#e8edf8}
-*{box-sizing:border-box}body{margin:0;padding:32px 18px;background:radial-gradient(ellipse at top,#172344 0,#0b1020 55%);min-height:100vh}
-main{max-width:1150px;margin:auto}.top{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
-h1{font-size:clamp(25px,4vw,38px);margin:0 0 8px}.muted{color:#9ba9c5;font-size:14px}
-button{border:1px solid #45608e;background:#20355d;color:#fff;padding:11px 16px;border-radius:10px;font-weight:650;cursor:pointer}button:hover{background:#2d4778}.action{display:inline-block;text-decoration:none;border:1px solid #45608e;background:#20355d;color:#fff;padding:11px 16px;border-radius:10px;font-weight:650}.action:hover{background:#2d4778}
-.panel{margin-top:24px;background:#111a2e;border:1px solid #263653;border-radius:16px;padding:20px;box-shadow:0 18px 55px #0003}
-.stats{display:flex;gap:28px;flex-wrap:wrap;margin:16px 0 4px}.stat strong{display:block;font-size:25px;margin-top:4px}.stat span{font-size:12px;color:#9ba9c5}
-.chart-wrap{height:420px;position:relative;margin-top:15px}.toolbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-select{background:#182744;color:#e8edf8;border:1px solid #3a4d70;padding:9px;border-radius:8px}
-#status{margin-top:12px;color:#9ba9c5;font-size:13px}.sources{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.pill{border:1px solid #354969;border-radius:100px;padding:6px 10px;font-size:12px;color:#bdc9df}
-@media(max-width:600px){body{padding:22px 12px}.panel{padding:14px}.chart-wrap{height:330px}}
-</style></head>
-<body><main>
-<div class="top"><div><h1>BigMint Price Monitor</h1><div class="muted">Automated price history · India Standard Time</div></div><div style="display:flex;gap:10px;flex-wrap:wrap"><button id="reload">↻ Reload latest data</button></div></div>
+:root{font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:#e9eefb;background:#0b1020;color-scheme:dark}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% -20%,#1b3158 0,#0b1020 56%);padding:34px 18px}
+main{max-width:1120px;margin:auto}.top{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:22px}
+h1{font-size:clamp(27px,4vw,38px);margin:0 0 7px;letter-spacing:-.03em}.sub{color:#a8b6d0;font-size:14px;line-height:1.55;max-width:720px}
+.panel{background:#111b30;border:1px solid #283b5d;border-radius:17px;padding:21px;margin:16px 0;box-shadow:0 18px 55px #0003}
+h2{font-size:17px;margin:0 0 14px}.label{display:block;color:#b9c7df;font-size:13px;font-weight:650;margin:0 0 8px}
+input,textarea,select{width:100%;background:#0b1426;color:#edf3ff;border:1px solid #354b70;border-radius:10px;padding:12px 13px;font:inherit;min-width:0}
+input:focus,textarea:focus,select:focus{outline:2px solid #7099e8;outline-offset:1px}
+.urlrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}
+button{background:#315b9f;border:1px solid #4d78bb;border-radius:10px;padding:11px 17px;color:white;font-weight:700;font-size:14px;cursor:pointer;white-space:nowrap}
+button:hover{background:#3c6bb8}button:disabled{opacity:.6;cursor:wait}.secondary{background:#1a2944;border-color:#415575}.secondary:hover{background:#243858}
+.hint,.small{color:#9eacc5;font-size:12px;line-height:1.55;margin-top:9px}
+.note{border-left:3px solid #6487c4;padding:9px 12px;background:#172640;border-radius:0 8px 8px 0;color:#bdcbe2;font-size:13px;line-height:1.5;margin-top:14px}
+.status{font-size:13px;color:#b5c4dc;margin-top:12px;min-height:19px;white-space:pre-wrap}.status.error{color:#ff9f9f}.status.ok{color:#9edbb8}
+.fieldrow{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:14px 0}
+.stat{background:#0c1629;border:1px solid #273b5c;padding:13px;border-radius:12px;min-width:0}
+.stat span{font-size:11px;letter-spacing:.07em;color:#9eacc5}.stat strong{display:block;font-size:clamp(18px,3vw,25px);margin-top:5px;overflow-wrap:anywhere}
+.chartbox{height:410px;position:relative;margin-top:15px}
+.details{margin-top:14px;border-top:1px solid #2a3b59;padding-top:12px}
+summary{cursor:pointer;color:#c4d1e7;font-size:13px;font-weight:650}
+textarea{min-height:140px;resize:vertical;margin-top:10px;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}
+.tablewrap{overflow:auto;margin-top:15px}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:9px 10px;border-bottom:1px solid #263754;white-space:nowrap}th{color:#aab9d2;font-weight:650}
+.badge{display:inline-block;border:1px solid #3b5276;color:#b9c9e2;border-radius:100px;padding:4px 9px;font-size:11px;margin-left:7px}
+footer{font-size:12px;color:#899ab7;line-height:1.6;margin:22px 2px}
+@media(max-width:650px){body{padding:22px 12px}.panel{padding:15px}.urlrow{grid-template-columns:1fr}.urlrow button{width:100%}.stats{gap:7px}.stat{padding:10px}.chartbox{height:330px}.fieldrow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<main>
+<header class="top">
+ <div><h1>URL Price Graph</h1><div class="sub">Paste a JSON endpoint, fetch it on demand, and plot its timestamp against price. No scheduled collection and no server-side storage.</div></div>
+ <span class="badge">Manual fetch</span>
+</header>
+
 <section class="panel">
-<div class="toolbar"><div><div class="muted">PRICE SERIES</div><div id="sources" class="sources"></div></div><select id="range"><option value="7">Last 7 days</option><option value="30" selected>Last 30 days</option><option value="90">Last 90 days</option><option value="0">All history</option></select></div>
-<div class="stats"><div class="stat"><span>LATEST PRICE</span><strong id="latest">—</strong></div><div class="stat"><span>LAST RECORDED</span><strong id="lastTime" style="font-size:16px">—</strong></div><div class="stat"><span>DATA POINTS</span><strong id="count">0</strong></div></div>
-<div class="chart-wrap"><canvas id="chart"></canvas></div><div id="status">Loading price history…</div>
+ <h2>1. Fetch JSON from a URL</h2>
+ <label class="label" for="url">GET endpoint</label>
+ <div class="urlrow">
+  <input id="url" type="url" spellcheck="false" value="https://www.bigmint.co/prices_tg/graph/1038/INR/f?market=ferrous" placeholder="https://example.com/api/prices">
+  <button id="fetchBtn">Fetch &amp; chart</button>
+ </div>
+ <div class="hint">The request runs in your browser using GET. The page sends an Accept: application/json header and does not send cookies or credentials.</div>
+ <div id="status" class="status" role="status">Ready. Paste a URL and press Fetch &amp; chart.</div>
+ <div class="note"><b>Browser restriction:</b> for a URL on another domain, that server must allow this page through CORS. A CORS error cannot be fixed by changing JavaScript headers or adding a Referer value in the browser.</div>
+ <details class="details">
+  <summary>Or paste the JSON response directly</summary>
+  <textarea id="jsonInput" placeholder='Paste the response body here, e.g. {"point":[[1764613800000,123.45],[1764635400000,125.10]]}'></textarea>
+  <div style="display:flex;justify-content:flex-end;margin-top:9px"><button id="jsonBtn" class="secondary">Parse pasted JSON</button></div>
+ </details>
 </section>
-<p class="muted">Collection runs four times daily (12 AM, 6 AM, 12 PM and 6 PM IST). Scheduled runs may be delayed by GitHub Actions. Automatic collection is paused pending approved BigMint API access. “Reload latest data” fetches the latest published history.</p>
+
+<section class="panel">
+ <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+  <h2 style="margin:0">2. Price history</h2><span id="seriesName" class="badge">No data loaded</span>
+ </div>
+ <div class="stats">
+  <div class="stat"><span>LATEST PRICE</span><strong id="latest">—</strong></div>
+  <div class="stat"><span>LATEST TIMESTAMP (IST)</span><strong id="latestTime" style="font-size:15px">—</strong></div>
+  <div class="stat"><span>DATA POINTS</span><strong id="pointCount">0</strong></div>
+ </div>
+ <div class="fieldrow">
+  <div><label class="label" for="timeField">Timestamp field / array column</label><select id="timeField" disabled><option>Waiting for data</option></select></div>
+  <div><label class="label" for="priceField">Price field / array column</label><select id="priceField" disabled><option>Waiting for data</option></select></div>
+ </div>
+ <div class="chartbox"><canvas id="priceChart"></canvas></div>
+ <div class="small">Dates and times are displayed in Asia/Kolkata (IST). Hover over the line to inspect individual readings.</div>
+ <div class="tablewrap">
+  <table><thead><tr><th>Timestamp (IST)</th><th>Price</th></tr></thead><tbody id="recentRows"><tr><td colspan="2" class="small">No readings yet.</td></tr></tbody></table>
+ </div>
+ <details class="details">
+  <summary>Inspect fetched response</summary>
+  <pre id="rawResponse" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#aabbd6;font-size:12px;max-height:300px;overflow:auto"></pre>
+ </details>
+</section>
+<footer>
+This is a browser-only viewer. It does not bypass CORS, authentication, paywalls, or access controls. If the endpoint blocks browser requests, retrieve its JSON through a method you are authorized to use and paste the response above. Avoid pasting URLs containing passwords, session cookies, or private API keys.
+</footer>
 </main>
 <script>
-let chart;
-const fmt = n => new Intl.NumberFormat('en-IN',{maximumFractionDigits:2}).format(n);
-const dt = n => new Intl.DateTimeFormat('en-IN',{dateStyle:'medium',timeStyle:'short',timeZone:'Asia/Kolkata'}).format(new Date(n));
-async function load(){
- const status=document.getElementById('status');status.textContent='Loading…';
- try{
-  const [sres,hres]=await Promise.all([fetch('sources.json?t='+Date.now()),fetch('data/history.json?t='+Date.now())]);
-  if(!sres.ok||!hres.ok)throw new Error('Could not load dashboard data');
-  const cfg=await sres.json(),hist=await hres.json(),names=cfg.sources||[];
-  const datasets=[],pills=[];let latest=null,total=0;
-  const cutoff=Number(document.getElementById('range').value);
-  for(const src of names){
-   const pts=(hist.sources?.[src.id]||[]).map(p=>({x:Number(p[0]),y:Number(p[1])})).filter(p=>Number.isFinite(p.x)&&Number.isFinite(p.y));
-   total+=pts.length;
-   if(pts.length){const last=pts[pts.length-1];if(!latest||last.x>latest.x)latest={...last,name:src.name};}
-   const visible=cutoff?pts.filter(p=>p.x>=Date.now()-cutoff*86400000):pts;
-   datasets.push({label:src.name,data:visible,borderWidth:2,pointRadius:2,pointHoverRadius:5,tension:.18,fill:false});
-   pills.push('<span class="pill">'+src.name.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))+'</span>');
-  }
-  document.getElementById('sources').innerHTML=pills.join('');
-  document.getElementById('latest').textContent=latest?fmt(latest.y):'—';
-  document.getElementById('lastTime').textContent=latest?dt(latest.x):'—';
-  document.getElementById('count').textContent=total.toLocaleString('en-IN');
-  if(chart)chart.destroy();
-  chart=new Chart(document.getElementById('chart'),{type:'line',data:{datasets},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false},plugins:{legend:{labels:{color:'#c8d3e8'}},tooltip:{callbacks:{title:items=>items.length?dt(items[0].parsed.x):'',label:item=>item.dataset.label+': '+fmt(item.parsed.y)}}},scales:{x:{type:'time',time:{tooltipFormat:'PPpp'},ticks:{color:'#9ba9c5',maxRotation:0},grid:{color:'#263653'}},y:{ticks:{color:'#9ba9c5'},grid:{color:'#263653'}}}}});
-  const updated=hist.updatedAt?dt(hist.updatedAt):'not yet collected';
-  status.textContent='History last updated: '+updated+'. '+(total?total+' stored observations.':'No observations yet — run the collection workflow once.');
- }catch(e){status.textContent='Error: '+e.message+'. Check that GitHub Pages is enabled and the workflow has run.';}
+(function(){
+"use strict";
+var rows=[],chart=null,lastPayload=null;
+var $=function(id){return document.getElementById(id);};
+var preferredTime=["timestamp","time","datetime","date","ts","x","t","created_at","updated_at"];
+var preferredPrice=["price","value","rate","close","amount","y","last","p"];
+function escapeHtml(v){return String(v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function formatTime(ms,withSeconds){
+ return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit",second:withSeconds?"2-digit":undefined,hour12:true}).format(new Date(ms));
 }
-document.getElementById('reload').addEventListener('click',load);
-document.getElementById('range').addEventListener('change',load);
-load();
-</script></body></html>
+function numberTime(v){
+ if(v instanceof Date)return v.getTime();
+ if(typeof v==="number"&&Number.isFinite(v)){
+  if(Math.abs(v)<100000000000)return v*1000;
+  if(Math.abs(v)>100000000000000)return v/1000;
+  return v;
+ }
+ if(typeof v==="string"){
+  var trimmed=v.trim();
+  if(/^[-+]?\d+(?:\.\d+)?$/.test(trimmed))return numberTime(Number(trimmed));
+  var parsed=Date.parse(trimmed);return Number.isFinite(parsed)?parsed:NaN;
+ }
+ return NaN;
+}
+function findArray(obj,depth){
+ if(depth>5||obj==null)return null;
+ if(Array.isArray(obj))return obj;
+ if(typeof obj!=="object")return null;
+ var keys=["point","points","data","prices","history","results","result","series","records","items"];
+ for(var i=0;i<keys.length;i++){
+  if(Array.isArray(obj[keys[i]])&&obj[keys[i]].length)return obj[keys[i]];
+ }
+ for(var k=0;k<keys.length;k++){
+  if(obj[keys[k]]&&typeof obj[keys[k]]==="object"){
+   var found=findArray(obj[keys[k]],depth+1);if(found&&found.length)return found;
+  }
+ }
+ var all=Object.keys(obj);
+ for(var j=0;j<all.length;j++){
+  if(obj[all[j]]&&typeof obj[all[j]]==="object"){
+   var nested=findArray(obj[all[j]],depth+1);if(nested&&nested.length)return nested;
+  }
+ }
+ return null;
+}
+function chooseField(keys,preferred){
+ for(var i=0;i<preferred.length;i++){
+  var hit=keys.find(function(k){return k.toLowerCase()===preferred[i];});
+  if(hit!==undefined)return hit;
+ }
+ for(var j=0;j<preferred.length;j++){
+  var partial=keys.find(function(k){return k.toLowerCase().indexOf(preferred[j])>=0;});
+  if(partial!==undefined)return partial;
+ }
+ return keys[0];
+}
+function configureFields(inputRows){
+ var sample=inputRows.find(function(r){return r!==null&&typeof r==="object";});
+ var time=$("timeField"),price=$("priceField");
+ time.innerHTML="";price.innerHTML="";
+ if(Array.isArray(sample)){
+  time.add(new Option("Column 1 (timestamp)","$0"));time.add(new Option("Column 2 (price)","$1"));
+  price.add(new Option("Column 2 (price)","$1"));price.add(new Option("Column 1 (timestamp)","$0"));
+ }else if(sample&&typeof sample==="object"){
+  var keys=Object.keys(sample);
+  keys.forEach(function(k){time.add(new Option(k,k));price.add(new Option(k,k));});
+  time.value=chooseField(keys,preferredTime);
+  price.value=chooseField(keys,preferredPrice);
+ }else{
+  throw new Error("Could not identify rows of timestamp and price values in this JSON.");
+ }
+ time.disabled=false;price.disabled=false;
+}
+function getValue(row,field){
+ if(field==="$0")return row[0];
+ if(field==="$1")return row[1];
+ return row&&row[field];
+}
+function draw(){
+ if(!rows.length)throw new Error("No rows found in the response.");
+ var tf=$("timeField").value,pf=$("priceField").value;
+ var pts=rows.map(function(r){
+  var x=numberTime(getValue(r,tf)),y=Number(getValue(r,pf));
+  return {x:x,y:y};
+ }).filter(function(p){return Number.isFinite(p.x)&&Number.isFinite(p.y);}).sort(function(a,b){return a.x-b.x;});
+ if(!pts.length)throw new Error("No valid points. Choose the correct timestamp and price fields above.");
+ $("latest").textContent=new Intl.NumberFormat("en-IN",{maximumFractionDigits:3}).format(pts[pts.length-1].y);
+ $("latestTime").textContent=formatTime(pts[pts.length-1].x,false);
+ $("pointCount").textContent=pts.length.toLocaleString("en-IN");
+ $("recentRows").innerHTML=pts.slice(-12).reverse().map(function(p){return "<tr><td>"+escapeHtml(formatTime(p.x,true))+"</td><td>"+escapeHtml(new Intl.NumberFormat("en-IN",{maximumFractionDigits:4}).format(p.y))+"</td></tr>";}).join("");
+ if(chart)chart.destroy();
+ var ctx=$("priceChart").getContext("2d");
+ chart=new Chart(ctx,{type:"line",data:{datasets:[{label:"Price",data:pts,borderColor:"#79a8ff",backgroundColor:"rgba(75,132,220,.15)",borderWidth:2,pointRadius:pts.length>250?0:2,pointHoverRadius:5,tension:.16,fill:true}]},options:{responsive:true,maintainAspectRatio:false,parsing:false,interaction:{mode:"nearest",intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:function(items){return items.length?formatTime(items[0].parsed.x,true):"";},label:function(item){return "Price: "+new Intl.NumberFormat("en-IN",{maximumFractionDigits:4}).format(item.parsed.y);}}}},scales:{x:{type:"linear",ticks:{color:"#9eacc5",maxTicksLimit:8,callback:function(v){return new Intl.DateTimeFormat("en-IN",{timeZone:"Asia/Kolkata",day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(v));}},grid:{color:"rgba(125,150,190,.13)"}},y:{ticks:{color:"#9eacc5"},grid:{color:"rgba(125,150,190,.13)"}}}}});
+}
+function showPayload(payload,source){
+ lastPayload=payload;
+ var candidate=findArray(payload,0);
+ if(!candidate&&payload&&typeof payload==="object"&&!Array.isArray(payload))candidate=[payload];
+ if(!candidate)throw new Error("JSON loaded, but no array of price observations was found. Expected rows like [timestamp, price] or objects with timestamp and price fields.");
+ rows=candidate;
+ configureFields(rows);
+ $("rawResponse").textContent=JSON.stringify(payload,null,2).slice(0,30000);
+ $("seriesName").textContent=source;
+ draw();
+}
+function status(msg,kind){$("status").textContent=msg;$("status").className="status"+(kind?" "+kind:"");}
+$("fetchBtn").addEventListener("click",async function(){
+ var raw=$("url").value.trim();
+ if(!raw){status("Paste a URL first.","error");return;}
+ var u;try{u=new URL(raw);}catch(e){status("That URL is not valid.","error");return;}
+ if(u.protocol!=="https:"&&u.protocol!=="http:"){status("Only http:// and https:// URLs are supported.","error");return;}
+ if(u.username||u.password){status("Remove any username or password from the URL. Do not put credentials in query strings.","error");return;}
+ var btn=$("fetchBtn");btn.disabled=true;btn.textContent="Fetching…";status("Sending GET request from this browser…");
+ var controller=new AbortController(),timer=setTimeout(function(){controller.abort();},20000);
+ try{
+  var response=await fetch(u.href,{method:"GET",mode:"cors",credentials:"omit",redirect:"follow",headers:{"Accept":"application/json, text/plain, */*"},signal:controller.signal,cache:"no-store"});
+  var body=await response.text();
+  if(!response.ok)throw new Error("The server returned HTTP "+response.status+" "+response.statusText+".");
+  var payload;try{payload=JSON.parse(body);}catch(e){throw new Error("The URL returned a response, but it was not valid JSON. Response starts: "+body.slice(0,180));}
+  showPayload(payload,u.hostname);
+  status("GET successful · "+response.status+" · "+rows.length+" source rows parsed.","ok");
+ }catch(e){
+  var msg=e.name==="AbortError"?"The request timed out after 20 seconds.":e.message||"Request failed.";
+  if(e instanceof TypeError)msg="The browser could not read the response. This is commonly a CORS restriction: the endpoint must explicitly allow this website's origin. Try opening the endpoint on its own, copying its JSON response, and using “Paste the JSON response directly” below.";
+  status(msg,"error");
+ }finally{clearTimeout(timer);btn.disabled=false;btn.textContent="Fetch & chart";}
+});
+$("jsonBtn").addEventListener("click",function(){
+ var raw=$("jsonInput").value.trim();if(!raw){status("Paste JSON into the box first.","error");return;}
+ try{var payload=JSON.parse(raw);showPayload(payload,"Pasted JSON");status("JSON parsed and charted successfully.","ok");}
+ catch(e){status(e.message||"Could not parse JSON.","error");}
+});
+$("timeField").addEventListener("change",function(){try{draw();status("Chart updated using the selected fields.","ok");}catch(e){status(e.message,"error");}});
+$("priceField").addEventListener("change",function(){try{draw();status("Chart updated using the selected fields.","ok");}catch(e){status(e.message,"error");}});
+})();
+</script>
+</body>
+</html>
