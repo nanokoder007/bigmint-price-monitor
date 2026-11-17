@@ -267,9 +267,8 @@ $("saveSource").addEventListener("click",function(){
  var name=$("newName").value.trim(),url=$("newUrl").value.trim();
  if(!name){setStatus("Enter a name for this price series.","error","sourceStatus");return;}
  try{var u=new URL(url);if(u.protocol!=="https:"&&u.protocol!=="http:")throw new Error();if(u.username||u.password)throw new Error();}catch(e){setStatus("Enter a valid http:// or https:// URL without embedded credentials.","error","sourceStatus");return;}
- var existing=series.find(function(s){return s.id===activeId;});
- if(existing){existing.name=name;existing.url=url;setStatus("Updated saved source.","ok","sourceStatus");}
- else{var item={id:makeId(),name:name,url:url,payload:null,timeField:null,priceField:null};series.push(item);activeId=item.id;setStatus("Saved source. Now paste its JSON response below.","ok","sourceStatus");}
+ var item={id:makeId(),name:name,url:url,payload:null,timeField:null,priceField:null};series.push(item);activeId=item.id;
+ setStatus("Saved a new source. Now paste its JSON response below.","ok","sourceStatus");
  saveStorage();renderSaved();selectSeries(activeId);
 });
 $("parseBtn").addEventListener("click",parseAndSave);
