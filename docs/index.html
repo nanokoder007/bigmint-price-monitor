@@ -88,7 +88,7 @@ footer{font-size:12px;color:#899ab7;line-height:1.6;margin:22px 2px}
  <details class="details"><summary>Inspect current JSON response</summary><pre id="rawResponse" style="white-space:pre-wrap;overflow-wrap:anywhere;color:#aabbd6;font-size:12px;max-height:300px;overflow:auto"></pre></details>
 </section>
 <footer>
-The chart and saved sources use browser local storage and stay on this device/browser. Clearing browser site data will remove them. The site does not bypass CORS or access controls, and it does not upload pasted responses to a server.
+Shared source names and URLs are loaded from docs/sources.json on GitHub. Pasted JSON responses, chart history, current selection, and field mappings remain in this browser only. Clearing browser site data removes that local chart data. The site does not bypass CORS or access controls.
 </footer>
 </main>
 <script>
@@ -144,7 +144,7 @@ function saveStorage(){
 }
 function renderSaved(){
  var host=$("savedList");host.innerHTML="";
- if(!series.length){var empty=document.createElement("div");empty.className="empty";empty.textContent="No saved sources yet. Add your first source above.";host.appendChild(empty);return;}
+ if(!series.length){var empty=document.createElement("div");empty.className="empty";empty.textContent="No shared sources configured yet. Add one to docs/sources.json on GitHub.";host.appendChild(empty);return;}
  series.forEach(function(s){
   var item=document.createElement("div");item.className="saved-item"+(s.id===activeId?" active":"");
   var meta=document.createElement("div");meta.className="saved-meta";
@@ -166,7 +166,7 @@ async function copyUrl(url){
 }
 function selectSeries(id){
  var s=series.find(function(x){return x.id===id;});if(!s)return;
- activeId=id;$("newName").value=s.name;$("newUrl").value=s.url;$("activeName").textContent=s.name;
+ activeId=id;$("activeName").textContent=s.name;
  $("jsonInput").value=s.payload?JSON.stringify(s.payload,null,2):"";
  renderSaved();
  if(s.payload){loadPayload(s.payload,s.name,s.timeField,s.priceField,false);setStatus("Loaded saved data for "+s.name+".","ok");}
